@@ -33,14 +33,17 @@ class BaseAgent(ABC):
         
         # Initialize LLM
         if llm is None:
-            if not self.settings.gemini_api_key:
+            api_key = self.settings.gemini_api_key
+            if not api_key:
+                self.logger.error(f"Settings object: {self.settings}")
+                self.logger.error(f"Gemini API Key: {api_key}")
                 raise ValueError(
                     "GEMINI_API_KEY_1 not found in environment. "
                     "Please add it to your .env file."
                 )
             self.llm = ChatGoogleGenerativeAI(
                 model="gemini-2.0-flash",
-                google_api_key=self.settings.gemini_api_key,
+                google_api_key=api_key,
                 temperature=temperature,
                 max_tokens=max_tokens
             )

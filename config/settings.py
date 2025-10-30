@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     max_tokens: int = Field(4000)
     
     model_config = {
-        "env_file": ".env",
+        "env_file": str(Path(__file__).parent.parent / ".env"),
         "env_file_encoding": "utf-8",
         "case_sensitive": False,
         "extra": "ignore"  # Allow extra fields in environment
