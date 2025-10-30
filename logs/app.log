@@ -1,0 +1,2 @@
+2025-10-30 23:21:15 | INFO     | config.logging_config:setup_logging:66 | Logging initialized with level: INFO
+2025-10-30 23:21:16 | INFO     | graph:_build_workflow:29 | Building prospect analysis workflow
