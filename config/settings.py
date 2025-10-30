@@ -5,29 +5,37 @@ from functools import lru_cache
 from typing import Optional
 from pathlib import Path
 from pydantic import Field
-
-# Load .env file before importing settings
 from dotenv import load_dotenv
-env_path = Path(__file__).parent.parent / ".env"
-if env_path.exists():
-    load_dotenv(env_path)
+
+# Load .env file into environment before Pydantic reads it
+try:
+    env_file = Path(__file__).parent.parent / ".env"
+    if env_file.exists():
+        load_dotenv(env_file, override=True)
+    else:
+        # Fallback to current working directory
+        load_dotenv(Path.cwd() / ".env", override=True)
+except Exception as e:
+    print(f"Warning: Could not load .env file: {e}")
 
 try:
-    from pydantic_settings import BaseSettings
+    from pydantic_settings import BaseSettings, SettingsConfigDict
 except ImportError:
     try:
         from pydantic import BaseSettings
+        SettingsConfigDict = dict
     except ImportError:
         # Fallback for older versions
         from pydantic import BaseModel as BaseSettings
+        SettingsConfigDict = dict
 
 
 class Settings(BaseSettings):
     """Application settings with environment variable support."""
 
     # API Keys
-    gemini_api_key: Optional[str] = Field(None, env="GEMINI_API_KEY_1")
-    langchain_api_key: Optional[str] = Field(None, env="LANGCHAIN_API_KEY")
+    gemini_api_key: Optional[str] = Field(default_factory=lambda: os.getenv("GEMINI_API_KEY_1"))
+    langchain_api_key: Optional[str] = Field(default_factory=lambda: os.getenv("LANGCHAIN_API_KEY"))
     
     # LangSmith Configuration
     langchain_tracing_v2: bool = Field(True, env="LANGCHAIN_TRACING_V2")
@@ -66,13 +74,11 @@ class Settings(BaseSettings):
     # Agent Configuration
     default_temperature: float = Field(0.1)
     max_tokens: int = Field(4000)
-    
-    model_config = {
-        "env_file": str(Path(__file__).parent.parent / ".env"),
-        "env_file_encoding": "utf-8",
-        "case_sensitive": False,
-        "extra": "ignore"  # Allow extra fields in environment
-    }
+
+    model_config = SettingsConfigDict(
+        case_sensitive=False,
+        extra="ignore"  # Allow extra fields in environment
+    )
 
 
 def get_settings() -> Settings:
