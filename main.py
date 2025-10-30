@@ -6,6 +6,13 @@ import asyncio
 from datetime import datetime
 from typing import Dict, Any, Optional
 
+# Fix asyncio event loop issues in Streamlit
+try:
+    import nest_asyncio
+    nest_asyncio.apply()
+except ImportError:
+    pass
+
 # Configure page
 st.set_page_config(
     page_title="🤖 AI-Powered Investment Analyzer",
