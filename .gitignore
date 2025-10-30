@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Cache
+.cache/
+.pytest_cache/
+.streamlit/
+
+# Test coverage
+htmlcov/
+.coverage
+
+# Distribution
+build/
+dist/
+*.egg-info/
+
+# Local settings
+.env.local
+.env.*.local
+
+# Streamlit
+.streamlit/cache/
