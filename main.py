@@ -1,5 +1,14 @@
 """Main Streamlit application for RM-AgenticAI-LangGraph system."""
 
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+env_path = Path(__file__).parent / ".env"
+if env_path.exists():
+    load_dotenv(env_path)
+
 import streamlit as st
 import pandas as pd
 import asyncio
