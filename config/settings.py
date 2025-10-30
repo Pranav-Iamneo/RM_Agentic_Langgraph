@@ -3,7 +3,14 @@
 import os
 from functools import lru_cache
 from typing import Optional
+from pathlib import Path
 from pydantic import Field
+
+# Load .env file before importing settings
+from dotenv import load_dotenv
+env_path = Path(__file__).parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(env_path)
 
 try:
     from pydantic_settings import BaseSettings
