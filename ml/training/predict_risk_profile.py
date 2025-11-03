@@ -5,11 +5,15 @@ Predicts risk profile and risk scores using ML model.
 
 import joblib
 import os
+<<<<<<< HEAD
 import pandas as pd
 import pickle
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+=======
+from sklearn.ensemble import RandomForestClassifier
+>>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
 from state import WorkflowState
 
 
@@ -17,6 +21,7 @@ def train_risk_model():
     """Train risk profile model using the available dataset"""
 
     model_path = "ml/models/risk_profile_model.pkl"
+<<<<<<< HEAD
     encoder_path = "ml/models/label_encoders.pkl"
 
     if os.path.exists(model_path) and os.path.exists(encoder_path):
@@ -89,6 +94,16 @@ def train_risk_model():
     except Exception as e:
         print(f"❌ Error training risk model: {str(e)}")
         return False
+=======
+
+    if os.path.exists(model_path):
+        print(f"✅ Risk model already exists at {model_path}")
+        return True
+
+    print("⚠️ Risk profile model training data not available")
+    print("Please provide training dataset in data/ folder")
+    return False
+>>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
 
 
 async def predict_risk_profile(state: WorkflowState) -> WorkflowState:

@@ -30,11 +30,16 @@ class RiskAssessmentAgent(CriticalAgent):
             self.label_encoders = joblib.load(self.settings.risk_encoders_path)
             self.logger.info("Risk assessment models loaded successfully")
         except Exception as e:
+<<<<<<< HEAD
             self.logger.warning(f"Failed to load risk models: {str(e)}")
             self.logger.warning("Falling back to rule-based risk assessment")
             # Continue without models - will use AI-only assessment and rule-based fallback
             self.risk_model = None
             self.label_encoders = None
+=======
+            self.logger.error(f"Failed to load risk models: {str(e)}")
+            # Continue without models - will use AI-only assessment
+>>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
     
     async def execute(self, state: WorkflowState) -> WorkflowState:
         """Execute risk assessment."""
@@ -71,7 +76,11 @@ class RiskAssessmentAgent(CriticalAgent):
             return self._rule_based_risk_assessment(prospect_data)
         
         try:
+<<<<<<< HEAD
             # Prepare input data - use only the features the model was trained on
+=======
+            # Prepare input data
+>>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
             input_data = {
                 "age": prospect_data.age,
                 "annual_income": prospect_data.annual_income,
@@ -79,12 +88,28 @@ class RiskAssessmentAgent(CriticalAgent):
                 "target_goal_amount": prospect_data.target_goal_amount,
                 "investment_horizon_years": prospect_data.investment_horizon_years,
                 "number_of_dependents": prospect_data.number_of_dependents,
+<<<<<<< HEAD
             }
 
             input_df = pd.DataFrame([input_data])
 
             # Encode categorical variables (target only, no other encoders needed for these features)
             # The label_encoders dict contains 'target' encoder, not feature encoders
+=======
+                "investment_experience_level": prospect_data.investment_experience_level,
+            }
+            
+            input_df = pd.DataFrame([input_data])
+            
+            # Encode categorical variables
+            for col, encoder in self.label_encoders.items():
+                if col in input_df.columns:
+                    try:
+                        input_df[col] = encoder.transform(input_df[col])
+                    except ValueError:
+                        # Handle unseen categories
+                        input_df[col] = encoder.transform([encoder.classes_[0]])[0]
+>>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
             
             # Make prediction
             prediction = self.risk_model.predict(input_df)[0]

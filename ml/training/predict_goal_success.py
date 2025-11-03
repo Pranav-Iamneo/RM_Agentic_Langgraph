@@ -5,10 +5,14 @@ Predicts probability of goal success using ML model.
 
 import joblib
 import os
+<<<<<<< HEAD
 import pandas as pd
 import pickle
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
+=======
+from sklearn.ensemble import RandomForestClassifier
+>>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
 from state import WorkflowState
 
 
@@ -16,6 +20,7 @@ def train_goal_model():
     """Train goal success prediction model using the available dataset"""
 
     model_path = "ml/models/goal_success_model.pkl"
+<<<<<<< HEAD
     encoder_path = "ml/models/goal_success_label_encoders.pkl"
 
     if os.path.exists(model_path) and os.path.exists(encoder_path):
@@ -88,6 +93,16 @@ def train_goal_model():
     except Exception as e:
         print(f"❌ Error training goal success model: {str(e)}")
         return False
+=======
+
+    if os.path.exists(model_path):
+        print(f"✅ Goal success model already exists at {model_path}")
+        return True
+
+    print("⚠️ Goal success model training data not available")
+    print("Please provide training dataset in data/ folder")
+    return False
+>>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
 
 
 async def predict_goal_success(state: WorkflowState) -> WorkflowState:
