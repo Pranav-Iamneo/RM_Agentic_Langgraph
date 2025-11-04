@@ -1,4 +1,175 @@
-"""Base agent class for all LangGraph agents."""
+"""
+TODO: Abstract base class and concrete implementations for all LangGraph agents.
+==============================================================================
+PURPOSE:
+  - Define common interface and lifecycle for all agents in the system
+  - Handle LLM initialization, error handling, and performance tracking
+  - Provide execution monitoring and validation framework
+  - Support both critical and optional agent modes
+
+KEY CLASSES:
+
+1. BaseAgent (Abstract Base Class)
+   Purpose: Template for all agent implementations
+
+   Constructor Parameters:
+   - name: Agent identifier (e.g., "RiskAssessmentAgent")
+   - description: Human-readable agent purpose
+   - llm: Optional pre-initialized language model
+   - temperature: LLM determinism (0.1 default = deterministic)
+   - max_tokens: Max response length (4000 default)
+
+   Abstract Methods:
+   - execute(state): Main agent logic (implemented by subclasses)
+   - get_prompt_template(): Return ChatPromptTemplate for agent
+
+   Concrete Methods:
+   - run(state): Main entry point with error handling
+   - generate_response(prompt): Invoke LLM with prompt
+   - validate_input(state): Pre-execution validation (override for custom)
+   - validate_output(state): Post-execution validation (override for custom)
+   - get_performance_metrics(): Return execution statistics
+   - reset_metrics(): Clear performance data
+
+   Metadata Tracking:
+   - execution_count: Total execution runs
+   - success_count: Successful runs
+   - error_count: Failed runs
+   - total_execution_time: Cumulative execution time (seconds)
+   - created_at: Agent initialization timestamp
+
+   LLM Integration:
+   - Auto-initializes ChatGoogleGenerativeAI (Gemini 2.0 Flash)
+   - Fetches API key from environment settings
+   - Falls back to provided LLM if available
+   - Logs detailed error if API key missing
+
+   Error Handling:
+   - Try-catch wrapper with detailed logging
+   - Input/output validation before/after execution
+   - Graceful exception handling (raises or returns state)
+   - Execution time tracking for performance analysis
+
+2. CriticalAgent (Subclass of BaseAgent)
+   Purpose: Agents that must succeed (workflow fails if they fail)
+
+   Behavior:
+   - Inherits all BaseAgent functionality
+   - Re-raises exceptions if execute() fails
+   - Used for: DataAnalyst, RiskAssessor, ProductSpecialist
+   - Stops workflow on error (no graceful degradation)
+
+   Execution Model:
+   1. run() calls execute()
+   2. Exception raised → state.complete_agent_execution(error)
+   3. Exception re-raised → caught by workflow node
+   4. Workflow halts, returns error state
+
+3. OptionalAgent (Subclass of BaseAgent)
+   Purpose: Agents that can fail gracefully (workflow continues)
+
+   Behavior:
+   - Inherits all BaseAgent functionality
+   - Catches exceptions and returns last valid state
+   - Used for: PersonaAgent
+   - Workflow continues on error (optional agent failure = warning)
+
+   Execution Model:
+   1. run() calls execute()
+   2. Exception raised → state.complete_agent_execution(error)
+   3. Exception NOT re-raised → state returned as-is
+   4. Workflow continues to next node
+
+WORKFLOW EXECUTION FLOW:
+
+  BaseAgent.run(state):
+    ↓
+    ├─ add_agent_execution(name) → Create execution tracking record
+    ├─ validate_input(state) → Validate input data
+    ├─ execute(state) [ASYNC] → Main agent logic (override this)
+    ├─ validate_output(result_state) → Validate output data
+    ├─ complete_agent_execution(success=True) → Mark as completed
+    ├─ Update success_count, error_count
+    ├─ Return result_state
+    └─ On Exception:
+       ├─ complete_agent_execution(success=False, error=msg)
+       ├─ Log error details
+       ├─ [CriticalAgent] Re-raise exception
+       └─ [OptionalAgent] Return state (no error)
+
+PERFORMANCE MONITORING:
+
+  get_performance_metrics():
+    ├─ execution_count: int (total runs)
+    ├─ success_rate: float (0.0-1.0)
+    ├─ error_rate: float (0.0-1.0)
+    ├─ avg_execution_time: float (seconds)
+    └─ created_at: datetime
+
+VALIDATION HOOKS:
+
+  validate_input(state) → bool:
+    - Override to add custom input validation
+    - Default: Returns True (no validation)
+    - Used in: DataAnalystAgent (field existence, ranges)
+
+  validate_output(state) → bool:
+    - Override to add custom output validation
+    - Default: Returns True (no validation)
+    - Used in: All agents (ensure results populated)
+
+LLM INITIALIZATION:
+
+  - Model: gemini-2.0-flash (latest Gemini model)
+  - API Key: From environment (GEMINI_API_KEY_1)
+  - Temperature: 0.1 (deterministic, minimal variation)
+  - Max Tokens: 4000 (response length limit)
+  - Fallback: None (raises error if key missing)
+
+LOGGING:
+
+  - Logger binding: logger.bind(agent=name)
+  - Tracks: Initialization, execution start, success, errors
+  - Format: <timestamp> | <level> | AgentName:function:line | message
+  - Files: logs/app.log and logs/agents.log
+
+DEPENDENCIES:
+  - abc: Abstract base class
+  - asyncio: Async execution
+  - datetime: Timestamp tracking
+  - langchain_core: LLM abstractions
+  - langchain_google_genai: Gemini API client
+  - loguru: Structured logging
+  - config.settings: Configuration management
+
+SUBCLASS IMPLEMENTATION TEMPLATE:
+
+  class MyAgent(BaseAgent):
+      def __init__(self):
+          super().__init__(
+              name="MyAgent",
+              description="Description of what this agent does"
+          )
+
+      def get_prompt_template(self) -> ChatPromptTemplate:
+          return ChatPromptTemplate.from_messages([
+              ("system", "System instructions..."),
+              ("human", "User input: {input}")
+          ])
+
+      async def execute(self, state: WorkflowState) -> WorkflowState:
+          # Your implementation here
+          prompt = self.get_prompt_template()
+          response = await self.generate_response(prompt)
+          # Update state with results
+          return state
+
+STATUS:
+  - Production-ready base class
+  - Used by all 6+ agents in system
+  - Proper error handling and monitoring
+  - Supports both critical and optional agent modes
+"""
 
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, List

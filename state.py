@@ -1,4 +1,137 @@
-"""Pydantic models for LangGraph state management."""
+"""
+TODO: Pydantic models for complete LangGraph state management.
+=============================================================
+PURPOSE:
+  - Define type-safe state models for workflow data passing
+  - Ensure data validation at workflow boundaries
+  - Track prospect data, analysis results, and execution metrics
+  - Support nested sub-states for modular organization
+
+KEY STATE MODELS (9 Pydantic Classes):
+
+1. ProspectData (Input Model)
+   - Fields: prospect_id, name, age, annual_income, current_savings
+             target_goal_amount, investment_horizon_years, number_of_dependents
+             investment_experience_level, investment_goal
+   - Purpose: Represents single prospect's financial profile
+   - Validation: Pydantic type checking for numeric/string fields
+
+2. RiskAssessmentResult (Analysis Output)
+   - Fields: risk_level (Low/Moderate/High), confidence_score (0.0-1.0)
+             risk_factors (List[str]), recommendations (List[str])
+   - Purpose: Stores risk profiling result from RiskAssessmentAgent
+   - Confidence: Score indicates algorithm certainty
+
+3. GoalPredictionResult (Analysis Output)
+   - Fields: goal_success (Likely/Unlikely), probability (0.0-1.0)
+             success_factors (List[str]), challenges (List[str])
+             timeline_analysis (Dict[str, Any])
+   - Purpose: Stores goal feasibility analysis from GoalPlanningAgent
+   - Timeline: Short/medium/long-term breakdown
+
+4. PersonaResult (Analysis Output)
+   - Fields: persona_type (Aggressive Growth/Steady Saver/Cautious Planner)
+             confidence_score (0.0-1.0), characteristics (List[str])
+             behavioral_insights (List[str])
+   - Purpose: Stores investor persona classification from PersonaAgent
+   - Insights: Behavioral patterns and decision-making traits
+
+5. ProductRecommendation (Output Model)
+   - Fields: product_id, product_name, product_type, suitability_score
+             justification, risk_alignment, expected_returns, fees
+   - Purpose: Single product recommendation with scoring and reasoning
+   - Suitability: 0.0-1.0 score indicating product fit
+
+6. MeetingGuide (Optional Output)
+   - Fields: agenda_items, key_talking_points, questions_to_ask
+             objection_handling (Dict), next_steps, estimated_duration
+   - Purpose: Prepared materials for RM meeting with client
+   - Status: Framework defined, not actively used yet
+
+7. ComplianceCheck (Validation Output)
+   - Fields: is_compliant (bool), compliance_score (0.0-1.0)
+             violations (List[str]), warnings (List[str])
+             required_disclosures (List[str])
+   - Purpose: Regulatory compliance validation results
+   - Score: Violations reduce score, warnings noted separately
+
+8. AgentExecution (Tracking Model)
+   - Fields: agent_name, start_time, end_time, status (running/completed/failed)
+             error_message, execution_time (seconds)
+   - Purpose: Track individual agent performance metrics
+   - Timing: Calculated from start/end timestamps
+
+SUB-STATE CONTAINERS (5 Pydantic Classes):
+
+9. ProspectState
+   - Contains: ProspectData, validation_errors, data_quality_score,
+              missing_fields
+   - Purpose: Wrapper for prospect input data and validation results
+
+10. AnalysisState
+    - Contains: RiskAssessmentResult, GoalPredictionResult, PersonaResult
+               analysis_timestamp, analysis_confidence
+    - Purpose: Aggregate all analysis results from agents
+
+11. RecommendationState
+    - Contains: List[ProductRecommendation], portfolio_allocation,
+               justification_text, ComplianceCheck
+    - Purpose: Store product recommendations and compliance status
+
+12. MeetingState
+    - Contains: MeetingGuide, presentation_slides, client_materials
+    - Purpose: Meeting preparation materials (future feature)
+
+13. ChatState
+    - Contains: conversation_history (List[Dict]), current_query,
+               context (Dict), response (str)
+    - Purpose: Interactive chat session state
+
+MASTER STATE MODEL:
+
+14. WorkflowState (Complete State)
+    - Sub-states: prospect, analysis, recommendations, meeting, chat
+    - Metadata: workflow_id, session_id, user_id, created_at, updated_at
+    - Tracking: current_step, completed_steps, failed_steps, agent_executions
+    - Config: workflow_config (Dict[str, Any])
+    - Summary: overall_confidence, key_insights, action_items
+
+KEY METHODS (WorkflowState):
+    - add_agent_execution(): Create tracking record for agent start
+    - complete_agent_execution(): Mark agent as completed/failed with timing
+    - get_execution_summary(): Calculate performance statistics
+      • total_executions, completed, failed, success_rate
+      • total_execution_time, average_execution_time
+
+STATE FLOW THROUGH WORKFLOW:
+    1. Initial State: WorkflowState with prospect.prospect_data set
+    2. Data Analysis: Updates prospect.data_quality_score, validation_errors
+    3. Risk Assessment: Updates analysis.risk_assessment
+    4. Persona Classification: Updates analysis.persona_classification
+    5. Product Recommendation: Updates recommendations.recommended_products,
+                              recommendations.justification_text
+    6. Finalize: Generates key_insights, action_items, overall_confidence
+
+VALIDATION & TYPE SAFETY:
+    - All models inherit from BaseModel (Pydantic)
+    - arbitrary_types_allowed = True for datetime, pandas objects
+    - Type hints enforce int, str, float, List, Dict, Optional
+    - Numeric bounds: confidence scores (0.0-1.0), probability (0.0-1.0)
+    - Enum-like strings: risk_level, goal_success, persona_type
+
+DEPENDENCIES:
+    - pydantic: BaseModel, Field for model definitions
+    - typing: Type hints (Dict, List, Optional, Any, Union)
+    - datetime: datetime fields for timestamps
+    - pandas: Optional pandas types support
+
+STATUS:
+    - Complete and production-ready
+    - All models functional and tested
+    - MeetingState not actively used yet
+    - ChatState framework in place for future chat features
+    - Supports seamless state passing through LangGraph workflow
+"""
 
 from typing import Dict, List, Optional, Any, Union
 from pydantic import BaseModel, Field

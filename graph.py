@@ -1,4 +1,105 @@
-"""Main prospect analysis workflow using LangGraph."""
+"""
+TODO: Main prospect analysis workflow orchestration using LangGraph.
+===================================================================
+PURPOSE:
+  - Orchestrate multi-agent analysis pipeline for financial prospects
+  - Define workflow state transitions and agent execution sequence
+  - Generate insights and action items from analysis results
+  - Manage workflow checkpointing and session state persistence
+
+KEY COMPONENTS:
+  1. ProspectAnalysisWorkflow Class
+     - Core orchestrator for 5-node sequential workflow
+     - Uses LangGraph StateGraph for directed acyclic graph execution
+     - Implements memory checkpointing for session persistence
+
+  2. Workflow Nodes (5-step pipeline)
+     a) data_analysis: Data validation & quality assessment
+     b) risk_assessment: Risk profiling (ML + AI)
+     c) persona_classification: Investor behavior classification
+     d) product_recommendation: Personalized product suggestions
+     e) finalize_analysis: Summary generation & insights
+
+  3. Node Functions
+     - Each node wraps an agent execution with error handling
+     - Tracks completion/failure in workflow state
+     - Passes state through pipeline with accumulated results
+     - Persona node is optional (graceful failure)
+     - All other nodes are critical (workflow fails if agent fails)
+
+  4. Insights & Actions Generation
+     - _generate_key_insights(): Extract top insights from analysis
+       • Risk profile statement
+       • Persona type statement
+       • Top product recommendation
+       • Data quality assessment
+     - _generate_action_items(): Create RM action checklist
+       • Validation corrections
+       • Risk discussion points (if High risk)
+       • Product presentation
+       • Persona-specific talking points
+       • Follow-up scheduling
+
+WORKFLOW EXECUTION:
+  1. Initialize agents (DataAnalyst, RiskAssessor, Persona, ProductSpecialist)
+  2. Build StateGraph with WorkflowState model
+  3. Add 5 nodes with async handlers
+  4. Define sequential edges: data → risk → persona → product → finalize → END
+  5. Compile with MemorySaver for checkpoint persistence
+  6. Execute async: analyze_prospect(prospect_data) → WorkflowState
+
+KEY METHODS:
+  - __init__(): Initialize agents and build workflow graph
+  - _build_workflow(): Create LangGraph StateGraph and compile
+  - async _data_analysis_node(): Validate input data quality
+  - async _risk_assessment_node(): Assess financial risk profile
+  - async _persona_classification_node(): Classify investor persona
+  - async _product_recommendation_node(): Generate product suggestions
+  - async _finalize_analysis_node(): Generate insights and actions
+  - _generate_key_insights(): Extract notable findings
+  - _generate_action_items(): Create RM action checklist
+  - async analyze_prospect(): Main execution entry point
+  - async get_workflow_state(): Retrieve session state
+  - get_workflow_summary(): Return workflow metadata
+
+STATE MANAGEMENT:
+  - Input: Dict[str, Any] with prospect data (csv row)
+  - Initial State: WorkflowState with workflow_id, session_id, timestamps
+  - Processing: State passes through pipeline, accumulating results
+  - Output: Complete WorkflowState with all analysis results
+  - Persistence: MemorySaver checkpoints at each step via thread_id
+
+CONFIGURATION:
+  - Sequential workflow (no branching/conditionals currently)
+  - All agents run synchronously per step
+  - Persona failures don't block workflow
+  - Other failures halt execution
+  - Session persistence via configurable thread_id
+
+DEPENDENCIES:
+  - langgraph.graph: StateGraph, END
+  - langgraph.checkpoint.memory: MemorySaver
+  - state.py: WorkflowState, ProspectData models
+  - langraph_agents: Agent implementations
+  - config.logging_config: Logger setup
+
+ERROR HANDLING:
+  - Try-catch in each node with detailed error logging
+  - Failed steps tracked in state.failed_steps
+  - Completed steps tracked in state.completed_steps
+  - Critical agent failures raise exception (halt workflow)
+  - Optional agent failures return state unchanged (continue)
+
+TIMESTAMP TRACKING:
+  - created_at: Workflow start time
+  - updated_at: Last state update time
+  - Node execution times tracked in agent_executions
+
+STATUS:
+  - Fully functional workflow engine
+  - Production-ready with proper error handling
+  - Supports async/await and Streamlit integration
+"""
 
 import uuid
 from typing import Dict, Any, Optional

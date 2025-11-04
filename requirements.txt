@@ -1,3 +1,31 @@
+# TODO: Python dependencies for RM-Agentic-LangGraph system.
+# =========================================================
+# PURPOSE:
+#   - Specify all required packages for installation (pip install -r requirements.txt)
+#   - Pin version ranges to ensure compatibility and stability
+#   - Support both development and production environments
+#
+# DEPENDENCY CATEGORIES:
+#   1. Core Web Framework & Data Processing
+#   2. Machine Learning & AI Models
+#   3. LangGraph & LLM Integration
+#   4. Google AI Integration
+#   5. Advanced AI/ML Tools
+#   6. Utilities (Translation, PDF, etc.)
+#   7. Development & Testing Tools
+#   8. Monitoring & Logging
+#
+# INSTALLATION:
+#   pip install -r requirements.txt
+#
+# NOTES:
+#   - All versions are minimum required versions (>=)
+#   - Compatible with Python 3.8+ (3.10+ recommended)
+#   - Windows, macOS, and Linux compatible
+#   - GPU support optional (FAISS CPU variant included)
+#
+# =========================================================
+
 # Core Dependencies
 streamlit>=1.29.0
 pandas>=2.0.0
@@ -5,44 +33,74 @@ numpy>=1.24.0
 python-dotenv>=1.0.0
 nest-asyncio>=1.5.0
 
-# Machine Learning
+# Machine Learning & Model Training
+#   scikit-learn: ML algorithms (RandomForest for risk/goal models)
+#   joblib: Model serialization/deserialization (pkl files)
 scikit-learn>=1.3.0
 joblib>=1.3.0
 
-# LangGraph and LangChain (Updated versions)
+# LangGraph and LangChain (Multi-Agent Orchestration)
+#   langgraph: Agent workflow orchestration, state management, checkpointing
+#   langchain: LLM framework, prompts, chains
+#   langchain-community: Third-party integrations
+#   langchain-google-genai: Google Gemini API integration
+#   langchain-core: Core abstractions and base classes
 langgraph>=0.0.40
 langchain>=0.1.0
 langchain-community>=0.0.20
 langchain-google-genai>=1.0.0
 langchain-core>=0.1.0
 
-# Google AI
+# Google AI (Gemini LLM)
+#   google-generativeai: Native Google Generative AI client
+#   Used for: Persona analysis, risk insights, product justifications
 google-generativeai>=0.3.0
 
-# Additional AI/ML Tools
+# Additional AI/ML Tools (Future Enhancement)
+#   sentence-transformers: Semantic embeddings (future semantic search)
+#   huggingface-hub: Hugging Face model access
+#   faiss-cpu: Vector similarity search (future RAG integration)
+#   transformers: Advanced NLP models
+#   sentencepiece: Tokenization for transformers
 sentence-transformers>=2.2.0
 huggingface-hub>=0.16.0
 faiss-cpu>=1.7.0
 transformers>=4.30.0
 sentencepiece>=0.1.99
 
-# Utilities (Updated for compatibility)
+# Utilities (Multi-Purpose Tools)
+#   googletrans: Language translation (future multi-language support)
+#   pymupdf: PDF extraction/manipulation
+#   PyPDF2: PDF processing (alternative/backup)
 googletrans==3.1.0a0
 pymupdf>=1.23.0
 PyPDF2>=3.0.0
 
 # Development and Testing
+#   pytest: Unit and integration testing framework
+#   black: Code formatter (enforces style)
+#   flake8: Linter (code quality checks)
 pytest>=7.4.0
 black>=23.0.0
 flake8>=6.0.0
 
 # Monitoring and Logging
+#   loguru: Advanced logging with rotation, compression, colors
+#   pydantic: Data validation and settings management
+#   pydantic-settings: Environment-based configuration (Pydantic v2)
 loguru>=0.7.0
 pydantic>=2.4.0
 pydantic-settings>=2.0.0
 
-# Additional dependencies for stability
+# Additional Dependencies (Stability & Compatibility)
+#   typing-extensions: Backport typing features for older Python
+#   requests: HTTP client library
+#   aiohttp: Async HTTP client (concurrent requests)
+#   markdown: Markdown parsing (future report generation)
 typing-extensions>=4.5.0
 requests>=2.28.0
 aiohttp>=3.8.0
 markdown>=3.4.0
+
+# TOTAL PACKAGES: ~35 libraries
+# TOTAL SIZE: ~500 MB (depends on system and optional dependencies)

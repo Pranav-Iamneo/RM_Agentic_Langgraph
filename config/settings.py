@@ -1,4 +1,88 @@
-"""Application settings and configuration management."""
+"""
+TODO: Centralized application settings and configuration management.
+===================================================================
+PURPOSE:
+  - Manage all application settings from environment variables
+  - Support both pydantic-settings (new) and BaseSettings (legacy) versions
+  - Provide single source of truth for configuration across modules
+  - Auto-load .env files for local development and deployment
+
+KEY FEATURES:
+  1. Environment Variable Loading
+     - Auto-discovers .env file in project root or current directory
+     - Uses python-dotenv for secure loading
+     - Graceful fallback if .env not found
+     - Supports override=True to prioritize .env over existing env vars
+
+  2. API Configuration
+     - gemini_api_key: Google Gemini API authentication (GEMINI_API_KEY_1)
+     - langchain_api_key: LangChain API key (optional, for future use)
+     - LangSmith tracing: Disabled by default (no valid API key)
+     - langchain_project: Project name for tracing (rm-agentic-ai)
+
+  3. Application Settings
+     - log_level: Logging verbosity (default: INFO)
+     - enable_monitoring: Toggle monitoring features (default: True)
+     - debug_mode: Development flag (default: False)
+
+  4. Performance Settings
+     - max_concurrent_agents: Limit parallel agent execution (default: 5)
+     - agent_timeout: Max execution time per agent in seconds (default: 300)
+     - cache_ttl: Cache time-to-live in seconds (default: 3600)
+
+  5. File Paths
+     - data_dir: Input data directory (default: data/)
+     - models_dir: Trained models directory (default: ml/models/)
+     - output_dir: Output/results directory (default: output/)
+     - prospects_csv: Prospect data file (default: data/input_data/prospects.csv)
+     - products_csv: Product catalog file (default: data/input_data/products.csv)
+
+  6. ML Model Files
+     - risk_model_path: Risk assessment model file
+     - goal_model_path: Goal success prediction model file
+     - label_encoders_path: Categorical encoders for risk model
+     - goal_success_encoders_path: Categorical encoders for goal model
+
+  7. LLM Configuration
+     - default_temperature: LLM temperature setting (default: 0.1)
+     - max_tokens: Max tokens in LLM responses (default: 4000)
+     - model_name: Selected LLM model (default: gemini-2.0-flash)
+
+PYDANTIC COMPATIBILITY:
+  - Tries pydantic-settings first (modern versions)
+  - Falls back to pydantic.BaseSettings (intermediate versions)
+  - Falls back to pydantic.BaseModel (legacy support)
+  - SettingsConfigDict handling for version compatibility
+
+SETTINGS ACCESS:
+  - get_settings(): Non-cached factory function (fresh read each time)
+  - get_cached_settings(): LRU-cached version (5 cache hits)
+  - Both return Settings instance with all configured values
+
+ENVIRONMENT VARIABLE NAMING:
+  - All settings map to ENV variables using Field(env="VAR_NAME")
+  - Example: log_level maps to LOG_LEVEL environment variable
+  - Optional settings default if environment variable not set
+
+COMMON USE CASES:
+  1. Get API key: settings.gemini_api_key
+  2. Get data path: settings.prospects_csv
+  3. Get model file: settings.risk_model_path
+  4. Get timeout: settings.agent_timeout
+  5. Check debug mode: settings.debug_mode
+
+ERROR HANDLING:
+  - Graceful degradation if .env file missing
+  - Supports missing API keys (development mode)
+  - Optional fields with sensible defaults
+  - Type validation via Pydantic
+
+STATUS:
+  - Production-ready configuration system
+  - Supports multiple Pydantic versions for compatibility
+  - All settings properly validated and documented
+  - Caching strategy optimizes repeated settings access
+"""
 
 import os
 from functools import lru_cache

@@ -1,9 +1,83 @@
-"""Main Streamlit application for RM-AgenticAI-LangGraph system."""
+"""
+TODO: Main Streamlit application for RM-AgenticAI-LangGraph system.
+======================================================================
+PURPOSE:
+  - Entry point for the web-based UI using Streamlit framework
+  - Orchestrates multi-agent AI analysis for investment prospects
+  - Provides real-time model status monitoring and async workflow execution
+  - Integrates LLM-based chat assistant for RM support
+
+KEY RESPONSIBILITIES:
+  1. Prospect Selection & Data Loading
+     - Load prospect data from CSV files
+     - Provide dropdown selection interface
+     - Display prospect details in expandable sections
+
+  2. ML Model Management
+     - Auto-train models on first run (ensure_models_trained)
+     - Monitor model status (Risk & Goal models)
+     - Fallback to rule-based predictions if models unavailable
+     - Display model availability in sidebar
+
+  3. Workflow Execution
+     - Initialize ProspectAnalysisWorkflow with cached singleton pattern
+     - Run async prospect analysis with progress tracking
+     - Handle asyncio event loop management (especially Windows compatibility)
+     - Store results in session state for persistence
+
+  4. Results Display
+     - Display comprehensive analysis results in tabs:
+       a) Analysis Results: Risk, Persona, Goals, Products
+       b) Agent Performance: Execution metrics and timing
+       c) Chat Assistant: Interactive Q&A about analysis
+     - Display key insights and action items
+     - Show data quality score progress bar
+
+  5. AI Chat Assistant
+     - Generate AI responses using Gemini API
+     - Fallback rule-based responses if LLM unavailable
+     - Provide contextual follow-up question suggestions
+     - Extract and pass analysis context to LLM
+
+FUNCTIONS:
+  - ensure_models_trained(): Auto-trains ML models on first run
+  - get_workflow(): Caches and returns ProspectAnalysisWorkflow instance
+  - check_model_status(): Checks if Risk & Goal models are loadable
+  - load_prospects(): Loads CSV data with fallback dummy data
+  - analyze_prospect_async(): Async wrapper for workflow execution
+  - run_analysis(): Synchronous wrapper for asyncio execution
+  - safe_get(): Safely accesses nested dict/object attributes
+  - display_analysis_results(): Renders comprehensive results UI
+  - generate_chat_response(): AI-powered response generation using Gemini
+  - generate_fallback_response(): Rule-based response when AI unavailable
+  - get_suggested_questions(): Generates contextual Q&A suggestions
+  - display_agent_performance(): Shows execution metrics table
+  - main(): Main application entry point
+
+CONFIGURATION:
+  - Page title: "🤖 AI-Powered Investment Analyzer"
+  - Layout: Wide with expanded sidebar
+  - Cache: 5-minute TTL for model status, unlimited for workflow
+  - Async event loop: Platform-specific handling (Windows selector policy)
+
+DEPENDENCIES:
+  - streamlit: UI framework
+  - pandas: Data manipulation
+  - asyncio: Async workflow execution
+  - nest_asyncio: Event loop management
+  - langchain_google_genai: Gemini API integration
+  - ProspectAnalysisWorkflow: Main analysis engine
+  - WorkflowState: Pydantic state model
+
+STATUS:
+  - Has merge conflicts (HEAD vs bedffaf) - resolve before production
+  - Async handling is platform-specific (Windows compatibility added)
+  - Model auto-training integrated but requires ml/training module
+"""
 
 import streamlit as st
 import pandas as pd
 import asyncio
-<<<<<<< HEAD
 import sys
 from datetime import datetime
 from typing import Dict, Any, Optional
@@ -18,17 +92,6 @@ except Exception as e:
 # Ensure we have a proper event loop for Windows
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-=======
-from datetime import datetime
-from typing import Dict, Any, Optional
-
-# Fix asyncio event loop issues in Streamlit
-try:
-    import nest_asyncio
-    nest_asyncio.apply()
-except ImportError:
-    pass
->>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
 
 # Configure page
 st.set_page_config(
@@ -49,7 +112,6 @@ settings = get_settings()
 setup_logging()
 logger = get_logger("MainApp")
 
-<<<<<<< HEAD
 # Auto-train models on first run
 @st.cache_resource
 def ensure_models_trained():
@@ -87,16 +149,12 @@ def ensure_models_trained():
         logger.error(f"Error during model training: {str(e)}")
         st.error(f"❌ Error training models: {str(e)}\n\nApp will use rule-based predictions instead.")
         return False
-
-=======
->>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
 # Initialize workflow
 @st.cache_resource
 def get_workflow():
     """Initialize and cache the workflow."""
     return ProspectAnalysisWorkflow()
 
-<<<<<<< HEAD
 @st.cache_data(ttl=300)  # Cache for 5 minutes to allow model updates
 def check_model_status():
     """Check the status of ML models."""
@@ -138,40 +196,6 @@ def check_model_status():
             model_status["Goal Prediction"] = {"loaded": False, "error": "Model files not found"}
     except Exception as e:
         model_status["Goal Prediction"] = {"loaded": False, "error": str(e)}
-
-=======
-@st.cache_data
-def check_model_status():
-    """Check the status of ML models."""
-    import joblib
-    from pathlib import Path
-    
-    models_dir = Path("models")
-    model_status = {}
-    
-    # Risk Assessment Model
-    try:
-        risk_model = joblib.load(models_dir / "risk_profile_model.pkl")
-        risk_encoders = joblib.load(models_dir / "label_encoders.pkl")
-        model_status["Risk Assessment"] = {
-            "loaded": True,
-            "info": f"Model: {type(risk_model).__name__}, Encoders: {len(risk_encoders)}"
-        }
-    except Exception:
-        model_status["Risk Assessment"] = {"loaded": False}
-    
-    # Goal Success Model
-    try:
-        goal_model = joblib.load(models_dir / "goal_success_model.pkl")
-        goal_encoders = joblib.load(models_dir / "goal_success_label_encoders.pkl")
-        model_status["Goal Prediction"] = {
-            "loaded": True,
-            "info": f"Model: {type(goal_model).__name__}, Encoders: {len(goal_encoders)}"
-        }
-    except Exception:
-        model_status["Goal Prediction"] = {"loaded": False}
-    
->>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
     return model_status
 
 # Load data
@@ -219,7 +243,6 @@ async def analyze_prospect_async(workflow: ProspectAnalysisWorkflow, prospect_da
     return await workflow.analyze_prospect(prospect_data)
 
 def run_analysis(workflow: ProspectAnalysisWorkflow, prospect_data: Dict[str, Any]) -> WorkflowState:
-<<<<<<< HEAD
     """Run prospect analysis synchronously with proper asyncio handling."""
     try:
         # Try to get the existing event loop
@@ -241,16 +264,6 @@ def run_analysis(workflow: ProspectAnalysisWorkflow, prospect_data: Dict[str, An
     finally:
         # Don't close the loop in Streamlit context
         pass
-=======
-    """Run prospect analysis synchronously."""
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-    
-    return loop.run_until_complete(analyze_prospect_async(workflow, prospect_data))
->>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
 
 def safe_get(obj, path, default=None):
     """Safely get nested attributes/keys from object or dict."""
@@ -575,7 +588,6 @@ def get_suggested_questions(analysis_state) -> list:
 
 def display_agent_performance(state):
     """Display agent performance metrics."""
-<<<<<<< HEAD
     st.subheader("🤖 Agent Performance Metrics")
 
     # Try to get agent executions from state
@@ -654,50 +666,6 @@ def main():
 
     # Ensure models are trained before running the app
     ensure_models_trained()
-
-=======
-    st.subheader("🤖 Agent Performance")
-    
-    agent_executions = safe_get(state, 'agent_executions', [])
-    if agent_executions:
-        perf_data = []
-        for execution in agent_executions:
-            perf_data.append({
-                "Agent": safe_get(execution, 'agent_name', 'Unknown'),
-                "Status": safe_get(execution, 'status', 'Completed').title(),
-                "Execution Time": f"{safe_get(execution, 'execution_time', 0):.2f}s",
-                "Start Time": "Recent",
-                "End Time": "Completed"
-            })
-        
-        perf_df = pd.DataFrame(perf_data)
-        st.dataframe(perf_df, use_container_width=True)
-    else:
-        # Show default agent status
-        default_agents = [
-            "Data Analyst Agent",
-            "Risk Assessment Agent", 
-            "Persona Agent",
-            "Product Specialist Agent"
-        ]
-        
-        perf_data = []
-        for agent in default_agents:
-            perf_data.append({
-                "Agent": agent,
-                "Status": "Completed",
-                "Execution Time": "< 10s",
-                "Start Time": "Recent",
-                "End Time": "Completed"
-            })
-        
-        perf_df = pd.DataFrame(perf_data)
-        st.dataframe(perf_df, use_container_width=True)
-
-def main():
-    """Main application."""
-    
->>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
     # Header
     st.title("🤖 AI-Powered Investment Analyzer")
     st.markdown("**Advanced Multi-Agent System for Financial Advisory**")

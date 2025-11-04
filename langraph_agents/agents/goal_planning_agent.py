@@ -30,16 +30,11 @@ class GoalPlanningAgent(CriticalAgent):
             self.goal_encoders = joblib.load(self.settings.goal_encoders_path)
             self.logger.info("Goal prediction models loaded successfully")
         except Exception as e:
-<<<<<<< HEAD
             self.logger.warning(f"Failed to load goal models: {str(e)}")
             self.logger.warning("Falling back to rule-based goal prediction")
             # Continue without models - will use rule-based prediction
             self.goal_model = None
             self.goal_encoders = None
-=======
-            self.logger.error(f"Failed to load goal models: {str(e)}")
-            # Continue without models - will use rule-based prediction
->>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
     
     async def execute(self, state: WorkflowState) -> WorkflowState:
         """Execute goal planning analysis."""
@@ -78,17 +73,12 @@ class GoalPlanningAgent(CriticalAgent):
             return self._rule_based_goal_prediction(prospect_data)
         
         try:
-<<<<<<< HEAD
             # Prepare input data - use only the features the model was trained on
-=======
-            # Prepare input data
->>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
             input_data = {
                 "age": prospect_data.age,
                 "annual_income": prospect_data.annual_income,
                 "current_savings": prospect_data.current_savings,
                 "target_goal_amount": prospect_data.target_goal_amount,
-<<<<<<< HEAD
                 "investment_horizon_years": prospect_data.investment_horizon_years,
                 "number_of_dependents": prospect_data.number_of_dependents,
             }
@@ -96,22 +86,6 @@ class GoalPlanningAgent(CriticalAgent):
             input_df = pd.DataFrame([input_data])
 
             # No encoding needed - all features are numeric
-=======
-                "investment_experience_level": prospect_data.investment_experience_level,
-                "investment_horizon_years": prospect_data.investment_horizon_years,
-            }
-            
-            input_df = pd.DataFrame([input_data])
-            
-            # Encode categorical variables
-            for col, encoder in self.goal_encoders.items():
-                if col in input_df.columns:
-                    try:
-                        input_df[col] = encoder.transform(input_df[col])
-                    except ValueError:
-                        # Handle unseen categories
-                        input_df[col] = encoder.transform([encoder.classes_[0]])[0]
->>>>>>> bedffafef0f7bda9b6501e9a959edb41aaefe771
             
             # Make prediction
             if hasattr(self.goal_model, 'predict_proba'):
